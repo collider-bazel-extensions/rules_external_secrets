@@ -1,0 +1,101 @@
+# Cross-namespace sync via ESO's `kubernetes` provider — common
+# production pattern.
+#
+# Use case: a "secrets" namespace holds the source-of-truth Secret
+# (often itself synced from external-secrets pulling Vault); apps in
+# other namespaces sync into their own namespace via this pattern.
+# Scoped via RBAC: the SecretStore references a ServiceAccount that
+# has permission only to read specific Secrets in the source namespace.
+---
+apiVersion: v1
+kind: Namespace
+metadata: {name: secrets-source}
+---
+apiVersion: v1
+kind: Namespace
+metadata: {name: app}
+---
+# 1. The source-of-truth Secret in `secrets-source`.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-creds
+  namespace: secrets-source
+type: Opaque
+stringData:
+  db-password: "real-prod-password"
+  api-key: "real-api-key"
+---
+# 2. ServiceAccount in the consumer namespace, with permission to read
+#    Secrets in `secrets-source`. ESO authenticates as this SA when
+#    talking to the K8s API for this SecretStore.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-secret-reader
+  namespace: app
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: read-app-creds
+  namespace: secrets-source
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["app-creds"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: app-secret-reader
+  namespace: secrets-source
+subjects:
+  - kind: ServiceAccount
+    name: app-secret-reader
+    namespace: app
+roleRef:
+  kind: Role
+  name: read-app-creds
+  apiGroup: rbac.authorization.k8s.io
+---
+# 3. SecretStore in `app` that reads from `secrets-source`.
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: source-store
+  namespace: app
+spec:
+  provider:
+    kubernetes:
+      remoteNamespace: secrets-source
+      auth:
+        serviceAccount:
+          name: app-secret-reader
+      server:
+        # In-cluster API server. ESO defaults to this; explicit for clarity.
+        url: https://kubernetes.default.svc
+        caProvider:
+          type: ConfigMap
+          name: kube-root-ca.crt
+          namespace: app
+          key: ca.crt
+---
+# 4. ExternalSecret in `app` pulling from the source.
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: app-secrets
+  namespace: app
+spec:
+  refreshInterval: 30s
+  secretStoreRef:
+    name: source-store
+    kind: SecretStore
+  target:
+    name: app-secrets
+  dataFrom:
+    - extract:
+        # Pulls all keys from the named Secret in the remote namespace.
+        key: app-creds

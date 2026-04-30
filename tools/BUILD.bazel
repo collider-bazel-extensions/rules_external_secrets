@@ -1,0 +1,26 @@
+"""Maintainer-only render flow."""
+
+load("@rules_helm//:defs.bzl", "helm_template")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+
+# ---- 2.4.1 ------------------------------------------------------------------
+
+helm_template(
+    name = "render_eso_2_4_1",
+    chart = ["@eso_chart_2_4_1//:files"],
+    values = ["//config:eso-values.yaml"],
+    namespace = "external-secrets",
+    release_name = "external-secrets",
+    include_crds = True,
+)
+
+sh_binary(
+    name = "render_writeback_2_4_1",
+    srcs = ["writeback.sh"],
+    data = [":render_eso_2_4_1"],
+    args = [
+        "$(rootpath :render_eso_2_4_1)",
+        "private/manifests/external_secrets.yaml",
+    ],
+    visibility = ["//visibility:public"],
+)

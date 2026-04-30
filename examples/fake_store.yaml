@@ -1,0 +1,40 @@
+# `fake` provider — what rules_external_secrets's smoke test uses.
+#
+# The SecretStore's data is baked directly into the spec, so the
+# operator's reconciler reads from the CR itself rather than reaching
+# out to a real backend. Designed for testing — production deployments
+# use Vault / AWS Secrets Manager / GCP Secret Manager / etc.
+---
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: fake-store
+  namespace: app
+spec:
+  provider:
+    fake:
+      data:
+        - key: my-app/db-password
+          value: "test-password-do-not-use-in-prod"
+        - key: my-app/api-key
+          value: "fake-api-key"
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: app-secrets
+  namespace: app
+spec:
+  refreshInterval: 30s
+  secretStoreRef:
+    name: fake-store
+    kind: SecretStore
+  target:
+    name: app-secrets
+  data:
+    - secretKey: DB_PASSWORD
+      remoteRef:
+        key: my-app/db-password
+    - secretKey: API_KEY
+      remoteRef:
+        key: my-app/api-key

@@ -1,0 +1,63 @@
+# HashiCorp Vault provider sketch — production pattern, **NOT** exercised
+# by rules_external_secrets's smoke (Vault would need its own in-cluster
+# fixture pod, deferred to v0.2).
+#
+# Use case: a real Vault instance at vault.vault.svc holds the secret
+# truths. ESO authenticates with a static token (other auth methods —
+# AppRole, Kubernetes Auth, JWT — are also supported via the same
+# SecretStore CR; see ESO docs).
+---
+apiVersion: v1
+kind: Namespace
+metadata: {name: app}
+---
+# Static token for ESO to use. In production this would itself be
+# bootstrapped — sealed-secrets, kubectl secret applied at deploy
+# time, or a service-account token reviewer auth method.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vault-token
+  namespace: app
+type: Opaque
+stringData:
+  token: "hvs.replace-with-real-vault-token"
+---
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: vault
+  namespace: app
+spec:
+  provider:
+    vault:
+      server: "http://vault.vault.svc:8200"
+      path: "secret"            # KV v2 mount path
+      version: "v2"
+      auth:
+        tokenSecretRef:
+          name: vault-token
+          namespace: app
+          key: token
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: app-secrets
+  namespace: app
+spec:
+  refreshInterval: 1m
+  secretStoreRef:
+    name: vault
+    kind: SecretStore
+  target:
+    name: app-secrets
+  data:
+    - secretKey: DB_PASSWORD
+      remoteRef:
+        key: app/db                 # → secret/data/app/db in Vault
+        property: password
+    - secretKey: API_KEY
+      remoteRef:
+        key: app/external-api
+        property: key

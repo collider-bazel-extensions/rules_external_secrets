@@ -1,0 +1,53 @@
+# Render-time values for rules_external_secrets's pinned manifest.
+#
+# Smoke-fixture footprint: single-replica everywhere, resource requests
+# trimmed, monitoring sidecars off. Production deployments override
+# `replicaCount` (HA), enable monitoring, and tune resources.
+
+replicaCount: 1
+
+# CRDs — yes, install them with the operator. (`crds.create: true` is
+# the chart default; explicit for clarity.)
+installCRDs: true
+crds:
+  create: true
+
+# Three Deployments come out of the chart by default:
+#   external-secrets               — the operator controller
+#   external-secrets-webhook       — admission webhook
+#   external-secrets-cert-controller — generates the webhook's serving cert
+# All three are needed for the operator to function.
+webhook:
+  replicaCount: 1
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 10m
+certController:
+  replicaCount: 1
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 10m
+
+resources:
+  requests:
+    memory: 64Mi
+    cpu: 10m
+
+# bitwarden-sdk-server subchart is gated on `.enabled`; disabled in the
+# chart's defaults but pinning it here makes the intent explicit.
+bitwarden-sdk-server:
+  enabled: false
+
+# No metrics / monitoring sidecars in the smoke render. Production
+# deployments enable these.
+serviceMonitor:
+  enabled: false
+metrics:
+  service:
+    enabled: false
+
+# Leader election off — single-replica doesn't need it, and turning it
+# off shaves a few seconds off startup.
+leaderElect: false
