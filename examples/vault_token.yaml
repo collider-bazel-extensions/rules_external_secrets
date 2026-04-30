@@ -23,7 +23,7 @@ type: Opaque
 stringData:
   token: "hvs.replace-with-real-vault-token"
 ---
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
   name: vault
@@ -40,7 +40,7 @@ spec:
           namespace: app
           key: token
 ---
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: app-secrets

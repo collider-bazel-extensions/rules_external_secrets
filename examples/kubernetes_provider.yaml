@@ -61,7 +61,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 # 3. SecretStore in `app` that reads from `secrets-source`.
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
   name: source-store
@@ -83,7 +83,7 @@ spec:
           key: ca.crt
 ---
 # 4. ExternalSecret in `app` pulling from the source.
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: app-secrets

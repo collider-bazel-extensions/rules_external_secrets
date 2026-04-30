@@ -29,7 +29,7 @@ install for Bazel test compositions. Same shape as `rules_loki` /
 - ESO chart 2.x is the current major. The chart's appVersion + chart version moved together at v2.0; older `v0.x` charts are end-of-life. Pin recent.
 - The chart deploys 3 Deployments by default. Disabling the webhook (`webhook.create: false`) removes one but breaks defaulting on ExternalSecret CRs — keep all three on.
 - The `fake` provider's data is part of the SecretStore CR's spec — ESO reads it from the CR rather than reaching out to a remote system. Designed for tests; documented in ESO's [provider list](https://external-secrets.io/main/provider/fake/).
-- ExternalSecret CRD is `external-secrets.io/v1beta1`. ESO's `v1` is being introduced gradually but `v1beta1` remains the stable surface for v2.x charts. The smoke + examples use `v1beta1`.
+- ExternalSecret + SecretStore CRDs use `external-secrets.io/v1` in ESO 2.x. The CRDs still LIST `v1beta1` in their `spec.versions[]`, but it's `served: false, storage: false` — applying a CR with `apiVersion: external-secrets.io/v1beta1` returns "no matches for kind". Smoke + examples use `v1`.
 - Chart has a `bitwarden-sdk-server` subchart (gated on `.enabled: false` by default — explicitly pinned off in our values file).
 
 ## v0.1.0 status (planning)

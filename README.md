@@ -113,7 +113,7 @@ your CRs as YAML and apply via `kubectl_apply`.**
 The simplest in-cluster pattern (and what `tests/smoke_test.sh` uses):
 
 ```yaml
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata: {name: fake-store, namespace: app}
 spec:
@@ -123,7 +123,7 @@ spec:
         - key: my-app/api-key
           value: "test-value"
 ---
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata: {name: my-secret, namespace: app}
 spec:

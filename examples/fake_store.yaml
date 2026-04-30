@@ -5,7 +5,7 @@
 # out to a real backend. Designed for testing — production deployments
 # use Vault / AWS Secrets Manager / GCP Secret Manager / etc.
 ---
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
   name: fake-store
@@ -19,7 +19,7 @@ spec:
         - key: my-app/api-key
           value: "fake-api-key"
 ---
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: app-secrets
