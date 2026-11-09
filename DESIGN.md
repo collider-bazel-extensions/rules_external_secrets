@@ -23,6 +23,7 @@ install for Bazel test compositions. Same shape as `rules_loki` /
 | 12 | Cross-rule deps | `rules_kubectl` public dep. `rules_helm` + `rules_kind` + `rules_itest` + `rules_shell` dev-only. No cert-manager required (chart self-signs the webhook cert). | rules_loki precedent |
 | 13 | Naming | snake_case rules/macros, `MixedCaseInfo` providers (none in v0.1), `UPPER_SNAKE` constants. | All siblings |
 | 14 | Update workflow | `bash tools/render_eso.sh <chart-version>` → thin shim. | rules_loki precedent |
+| 15 | Release archive (v0.1.1) | `tests/` (dev-only `rules_itest`, `rules_kind`, `rules_helm`) and `tools/` (maintainer chart render) are `export-ignore` (`.gitattributes`), so `@rules_external_secrets//...` loads for consumers. `REPO.bazel` `ignore_directories` would also hide them from this repo's own `bazel test`. A `git_override` clone still contains them. CI's `consumer` job (`.github/consumer/check.sh`) queries and builds `//...` from the commit's `git archive`. | Same fix as rules_kubectl#5 |
 
 ## ESO-specific notes
 
