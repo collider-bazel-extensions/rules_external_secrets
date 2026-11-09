@@ -6,7 +6,7 @@ kubectl_apply_health_check pre-configured for ESO.
 
 module(
     name = "rules_external_secrets",
-    version = "0.1.0",
+    version = "0.1.1",
 )
 
 bazel_dep(name = "bazel_skylib", version = "1.8.2")

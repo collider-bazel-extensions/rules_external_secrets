@@ -45,11 +45,16 @@ Validated on Linux x86\_64 in CI.
 ## Installation
 
 ```python
-bazel_dep(name = "rules_external_secrets", version = "0.1.0")
+bazel_dep(name = "rules_external_secrets", version = "0.1.1")
 ```
 
 Bzlmod-only. Transitively pulls in
 [`rules_kubectl`](https://github.com/collider-bazel-extensions/rules_kubectl).
+
+The release archive (the tag tarball) leaves out `tests/` and `tools/`, whose
+packages load dev-only modules, so `bazel query @rules_external_secrets//...` works for
+consumers (through v0.1.0 it failed). A `git_override` clone still contains
+them; name packages instead (for example `@rules_external_secrets//:all`).
 
 ---
 
