@@ -207,3 +207,11 @@ PRs welcome. Conventions match the sibling rule sets:
 - `PushSecret` smoke (push K8s Secret upward to a backend)
 - `ClusterSecretStore` / `ClusterExternalSecret` examples
 - AWS Secrets Manager provider via LocalStack fixture
+
+---
+
+## Requesting a new rules package
+
+Want Bazel rules for another tool or service?
+[Request a rules package](https://github.com/collider-bazel-extensions/.github/issues/new?template=request-a-rules-package.yml).
+The [organization page](https://github.com/collider-bazel-extensions) lists every package.
